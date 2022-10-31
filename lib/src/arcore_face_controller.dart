@@ -58,4 +58,11 @@ class ArCoreFaceController {
   void dispose() {
     _channel?.invokeMethod<void>('dispose');
   }
+
+  Future<String> snapshot() async {
+
+    final String path = await _channel.invokeMethod('takeScreenshot');
+
+    return path;
+  }
 }
