@@ -21,6 +21,7 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlin.collections.HashMap
+import com.difrancescogianmarco.arcore_flutter_plugin.utils.ScreenshotsUtils
 
 class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessenger, id: Int, debug: Boolean) : BaseArCoreView(activity, context, messenger, id, debug) {
 
@@ -78,6 +79,10 @@ class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessen
             when (call.method) {
                 "init" -> {
                     arScenViewInit(call, result)
+                }
+                "takeScreenshot" -> {
+                    debugLog(" Take screenshot...")
+                    ScreenshotsUtils.onGetSnapshot(arSceneView,result,activity)
                 }
                 "loadMesh" -> {
                     val map = call.arguments as HashMap<*, *>
