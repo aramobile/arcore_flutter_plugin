@@ -8,12 +8,12 @@ import 'arcore_view.dart';
 typedef void ArCoreFaceViewCreatedCallback(ArCoreFaceController controller);
 
 class ArCoreFaceView extends StatefulWidget {
-  final ArCoreFaceViewCreatedCallback onArCoreViewCreated;
+  final ArCoreFaceViewCreatedCallback? onArCoreViewCreated;
   final bool enableAugmentedFaces;
   final bool debug;
 
   const ArCoreFaceView(
-      {Key key,
+      {Key? key,
       this.onArCoreViewCreated,
       this.enableAugmentedFaces = false,
       this.debug = false})
@@ -50,10 +50,7 @@ class _ArCoreFaceViewState extends State<ArCoreFaceView>
   }
 
   void _onPlatformViewCreated(int id) {
-    if (widget.onArCoreViewCreated == null) {
-      return;
-    }
-    widget.onArCoreViewCreated(
+    widget.onArCoreViewCreated?.call(
       ArCoreFaceController(
         id: id,
         enableAugmentedFaces: widget.enableAugmentedFaces,

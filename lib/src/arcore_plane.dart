@@ -1,11 +1,11 @@
 import 'arcore_pose.dart';
 
 class ArCorePlane {
-  double extendX;
-  double extendZ;
+  double extendX=0;
+  double extendZ=0;
 
-  ArCorePose centerPose;
-  ArCorePlaneType type;
+  late ArCorePose centerPose;
+  late ArCorePlaneType type;
 
   ArCorePlane.fromMap(Map<dynamic, dynamic> map) {
     this.extendX = map["extendX"];

@@ -19,9 +19,9 @@ class ArCoreView extends StatefulWidget {
   final ArCoreViewType type;
 
   const ArCoreView(
-      {Key key,
-      @required this.onArCoreViewCreated,
-//    @required this.onArCoreUnsupported,
+      {Key? key,
+      required this.onArCoreViewCreated,
+//    required this.onArCoreUnsupported,
       this.enableTapRecognizer = false,
       this.enablePlaneRenderer = true,
       this.enableUpdateListener = false,

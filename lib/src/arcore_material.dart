@@ -2,11 +2,11 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 class ArCoreMaterial {
-  final Color color;
+  final Color? color;
 
 //  final String texture;
 
-  final Uint8List textureBytes;
+  final Uint8List? textureBytes;
 
   /// The metallic property defines whether the surface is a metallic (conductor)
   /// or a non-metallic (dielectric) surface. This property should be used as a
@@ -28,16 +28,16 @@ class ArCoreMaterial {
   final double reflectance;
 
   ArCoreMaterial({
-    this.metallic,
-    this.roughness,
-    this.reflectance,
+    this.metallic=0,
+    this.roughness=0.4,
+    this.reflectance=0.5,
     this.color,
 //    this.texture,
     this.textureBytes,
   });
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'color': [color.alpha, color.red, color.green, color.blue],
+        'color': [color?.alpha??0, color?.red??0, color?.green??0, color?.blue??0],
 //        'texture': this.texture,
         'textureBytes': this.textureBytes,
         'metallic': this.metallic,

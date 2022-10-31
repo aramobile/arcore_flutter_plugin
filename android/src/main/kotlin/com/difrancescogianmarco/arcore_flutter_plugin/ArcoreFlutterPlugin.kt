@@ -18,18 +18,18 @@ class ArcoreFlutterPlugin : FlutterPlugin, ActivityAware {
 
     @Nullable
     private var flutterPluginBinding: FlutterPlugin.FlutterPluginBinding? = null
-    
+
     private var methodCallHandler: MethodCallHandlerImpl? = null
 
     companion object {
         const val TAG = "ArCoreFlutterPlugin"
-        
+
         private const val CHANNEL_NAME = "arcore_flutter_plugin"
         @JvmStatic
         fun registerWith(registrar: Registrar) {
             registrar
-                    .platformViewRegistry()
-                    .registerViewFactory(CHANNEL_NAME, ArCoreViewFactory(registrar.activity(), registrar.messenger()))
+                .platformViewRegistry()
+                .registerViewFactory(CHANNEL_NAME, ArCoreViewFactory(registrar.activity()!!, registrar.messenger()))
         }
     }
 
@@ -55,7 +55,7 @@ class ArcoreFlutterPlugin : FlutterPlugin, ActivityAware {
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         flutterPluginBinding?.platformViewRegistry?.registerViewFactory(CHANNEL_NAME, ArCoreViewFactory(binding.activity, flutterPluginBinding?.binaryMessenger!!))
         methodCallHandler = MethodCallHandlerImpl(
-                binding.activity, flutterPluginBinding?.binaryMessenger!!)
+            binding.activity, flutterPluginBinding?.binaryMessenger!!)
 
     }
 
