@@ -27,53 +27,41 @@ class ScreenshotsUtils {
 
             var sDate: String = SimpleDateFormat("yyyyMMddHHmmss").format(Date());
 
-            return "MyApp-" + sDate + ".png";
+            return "arcore-" + sDate + ".png";
         }
 
 
         fun saveBitmap(bitmap: Bitmap,activity: Activity): String {
 
-            
-            val externalDir = Environment.getExternalStorageDirectory().getAbsolutePath();
-            
-            val sDir = externalDir + File.separator + "MyApp";
-                
-            val dir = File(sDir);
+            val cacheDir = activity.getCacheDir();
+
+            val dir = File(cacheDir, getPictureName());
 
             val dirPath: String;
 
-            if( dir.exists() || dir.mkdir()) {
-                dirPath = sDir + File.separator + getPictureName();
-            } else {
-                dirPath = externalDir + File.separator + getPictureName();
-            }
-        
-
-            
             try{
 
-                val file = File(dirPath)
-            
+                val file = dir;
+
                 // Get the file output stream
                 val stream: OutputStream = FileOutputStream(file)
-                
+
                 // Compress bitmap
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                
+
                 // Flush the stream
                 stream.flush()
 
                 // Close stream
                 stream.close()
 
-            
-           }catch (e: Exception){
+
+            }catch (e: Exception){
                 e.printStackTrace()
             }
 
 
-            return dirPath;
-           
+            return dir.getAbsolutePath();
 
 
         }
