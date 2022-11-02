@@ -1,9 +1,18 @@
 package com.difrancescogianmarco.arcore_flutter_plugin
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.opengl.EGL14
+import android.opengl.EGLContext
+import android.opengl.EGLDisplay
+import android.opengl.EGLSurface
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.StrictMode.VmPolicy
 import android.util.Log
 import com.difrancescogianmarco.arcore_flutter_plugin.utils.ArCoreUtils
 import com.google.ar.core.AugmentedFace
@@ -22,6 +31,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlin.collections.HashMap
 import com.difrancescogianmarco.arcore_flutter_plugin.utils.ScreenshotsUtils
+import android.os.StrictMode
 
 class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessenger, id: Int, debug: Boolean) : BaseArCoreView(activity, context, messenger, id, debug) {
 
@@ -71,6 +81,7 @@ class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessen
                 }
             }
         }
+
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -109,21 +120,21 @@ class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessen
             // Load the face regions renderable.
             // This is a skinned model that renders 3D objects mapped to the regions of the augmented face.
             ModelRenderable.builder()
-                    .setSource(activity, Uri.parse(skin3DModelFilename))
-                    .build()
-                    .thenAccept { modelRenderable ->
-                        faceRegionsRenderable = modelRenderable
-                        modelRenderable.isShadowCaster = false
-                        modelRenderable.isShadowReceiver = false
-                    }
+                .setSource(activity, Uri.parse(skin3DModelFilename))
+                .build()
+                .thenAccept { modelRenderable ->
+                    faceRegionsRenderable = modelRenderable
+                    modelRenderable.isShadowCaster = false
+                    modelRenderable.isShadowReceiver = false
+                }
         }
 
         // Load the face mesh texture.
         Texture.builder()
-                //.setSource(activity, Uri.parse("fox_face_mesh_texture.png"))
-                .setSource(BitmapFactory.decodeByteArray(textureBytes, 0, textureBytes!!.size))
-                .build()
-                .thenAccept { texture -> faceMeshTexture = texture }
+            //.setSource(activity, Uri.parse("fox_face_mesh_texture.png"))
+            .setSource(BitmapFactory.decodeByteArray(textureBytes, 0, textureBytes!!.size))
+            .build()
+            .thenAccept { texture -> faceMeshTexture = texture }
     }
 
     private fun arScenViewInit(call: MethodCall, result: MethodChannel.Result) {
@@ -139,6 +150,7 @@ class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessen
     }
 
     override fun onResume() {
+        restoreEglContext()
         if (arSceneView == null) {
             return
         }
@@ -179,9 +191,59 @@ class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessen
 
     }
 
+    override fun onPause() {
+        saveEglContext()
+        debugLog("onPause()")
+        if (arSceneView != null) {
+            arSceneView?.pause()
+        }
+    }
+
     override fun onDestroy() {
         arSceneView?.scene?.removeOnUpdateListener(faceSceneUpdateListener)
         super.onDestroy()
     }
 
+    private fun restoreEglContext() {
+        if (Looper.getMainLooper().thread != Thread.currentThread()) {
+            throw IllegalStateException("restoreEglContext called from non-UI thread")
+        }
+        debugLog("Restoring EGL context")
+        if (savedContext != null && savedContext != EGL14.EGL_NO_CONTEXT) {
+            if (!EGL14.eglMakeCurrent(savedDisplay, savedDrawSurface, savedReadSurface, savedContext)) {
+                debugLog("Failed to restore")
+            }
+        } else {
+            debugLog("Nothing to restore")
+        }
+    }
+
+    private fun saveEglContext() {
+        if (Looper.getMainLooper().thread != Thread.currentThread()) {
+            throw IllegalStateException("saveEglContext called from non-UI thread")
+        }
+        debugLog("Saving EGL context")
+        val currentContext = EGL14.eglGetCurrentContext()
+        if (currentContext == null || currentContext == EGL14.EGL_NO_CONTEXT) {
+            debugLog("Nothing to save")
+        } else {
+            savedContext = currentContext
+            savedDisplay = EGL14.eglGetCurrentDisplay()
+            savedDrawSurface = EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW)
+            savedReadSurface = EGL14.eglGetCurrentSurface(EGL14.EGL_READ)
+            EGL14.eglMakeCurrent(
+                savedDisplay,
+                EGL14.EGL_NO_SURFACE,
+                EGL14.EGL_NO_SURFACE,
+                EGL14.EGL_NO_CONTEXT
+            )
+        }
+    }
+
+    companion object {
+        private var savedContext: EGLContext? = null
+        private var savedDisplay: EGLDisplay? = null
+        private var savedReadSurface: EGLSurface? = null
+        private var savedDrawSurface: EGLSurface? = null
+    }
 }

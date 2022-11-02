@@ -5,6 +5,8 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.os.StrictMode
+import android.os.StrictMode.VmPolicy
 import android.util.Log
 import android.view.View
 import com.difrancescogianmarco.arcore_flutter_plugin.flutter_models.FlutterArCoreNode
@@ -19,6 +21,7 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
+import com.google.ar.sceneform.rendering.Renderer
 
 open class BaseArCoreView(val activity: Activity, context: Context, messenger: BinaryMessenger, id: Int, protected val debug: Boolean) : PlatformView, MethodChannel.MethodCallHandler {
 
@@ -51,6 +54,11 @@ open class BaseArCoreView(val activity: Activity, context: Context, messenger: B
         activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 debugLog("onActivityCreated")
+                StrictMode.setVmPolicy(
+                    VmPolicy.Builder(StrictMode.getVmPolicy())
+                        .detectLeakedClosableObjects()
+                        .build()
+                )
             }
 
             override fun onActivityStarted(activity: Activity) {
@@ -81,7 +89,7 @@ open class BaseArCoreView(val activity: Activity, context: Context, messenger: B
         }
 
         activity.application
-                .registerActivityLifecycleCallbacks(this.activityLifecycleCallbacks)
+            .registerActivityLifecycleCallbacks(this.activityLifecycleCallbacks)
     }
 
     override fun getView(): View? {
@@ -137,8 +145,8 @@ open class BaseArCoreView(val activity: Activity, context: Context, messenger: B
 //            return
 //        }
     }
-    
-    
+
+
     fun attachNodeToParent(node: Node?, parentNodeName: String?) {
         if (parentNodeName != null) {
             debugLog(parentNodeName)
@@ -186,11 +194,11 @@ open class BaseArCoreView(val activity: Activity, context: Context, messenger: B
     }
 
     fun removeNode(node: Node) {
-            arSceneView?.scene?.removeChild(node)
-            debugLog("removed ${node.name}")
+        arSceneView?.scene?.removeChild(node)
+        debugLog("removed ${node.name}")
     }
 
-    fun onPause() {
+    open fun onPause() {
         debugLog("onPause()")
         if (arSceneView != null) {
             arSceneView?.pause()
@@ -199,8 +207,24 @@ open class BaseArCoreView(val activity: Activity, context: Context, messenger: B
 
     open fun onDestroy() {
         if (arSceneView != null) {
-            arSceneView?.destroy()
-            arSceneView = null
+            debugLog("Goodbye ARCore! Destroying the Activity now 7.")
+
+            try {
+
+                debugLog("Goodbye arSceneView.")
+
+                arSceneView?.pause()
+                arSceneView?.session?.close()
+                /*  Renderer.destroyAllResources();
+                  Renderer.reclaimReleasedResources();*/
+//                arSceneView?.renderer?.dispose()
+                arSceneView?.destroy()
+                Renderer.destroyAllResources()
+                arSceneView = null
+
+            }catch (e : Exception){
+                e.printStackTrace();
+            }
         }
     }
 }

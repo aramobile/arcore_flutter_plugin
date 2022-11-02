@@ -4,8 +4,14 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.opengl.EGL14
+import android.opengl.EGLContext
+import android.opengl.EGLDisplay
+import android.opengl.EGLSurface
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.os.StrictMode.VmPolicy
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -30,6 +36,10 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
+import android.os.StrictMode
+
+
+
 
 class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMessenger, id: Int, private val isAugmentedFaces: Boolean, private val debug: Boolean) : PlatformView, MethodChannel.MethodCallHandler {
     private val methodChannel: MethodChannel = MethodChannel(messenger, "arcore_flutter_plugin_$id")
@@ -54,17 +64,17 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
         arSceneView = ArSceneView(context)
         // Set up a tap gesture detector.
         gestureDetector = GestureDetector(
-                context,
-                object : GestureDetector.SimpleOnGestureListener() {
-                    override fun onSingleTapUp(e: MotionEvent): Boolean {
-                        onSingleTap(e)
-                        return true
-                    }
+            context,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onSingleTapUp(e: MotionEvent): Boolean {
+                    onSingleTap(e)
+                    return true
+                }
 
-                    override fun onDown(e: MotionEvent): Boolean {
-                        return true
-                    }
-                })
+                override fun onDown(e: MotionEvent): Boolean {
+                    return true
+                }
+            })
 
         sceneUpdateListener = Scene.OnUpdateListener { frameTime ->
 
@@ -152,9 +162,9 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
         // Load the face mesh texture.
         //                .setSource(activity, Uri.parse("fox_face_mesh_texture.png"))
         Texture.builder()
-                .setSource(BitmapFactory.decodeByteArray(textureBytes, 0, textureBytes!!.size))
-                .build()
-                .thenAccept { texture -> faceMeshTexture = texture }
+            .setSource(BitmapFactory.decodeByteArray(textureBytes, 0, textureBytes!!.size))
+            .build()
+            .thenAccept { texture -> faceMeshTexture = texture }
     }
 
 
@@ -210,6 +220,7 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
             "resume" -> {
                 debugLog("Resuming ARCore now")
                 onResume()
+
             }
             "getTrackingState" -> {
                 debugLog("1/3: Requested tracking state, returning that back to Flutter now")
@@ -251,6 +262,11 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
             override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
                 debugLog("onActivityCreated")
 //                maybeEnableArButton()
+                StrictMode.setVmPolicy(
+                    VmPolicy.Builder(StrictMode.getVmPolicy())
+                        .detectLeakedClosableObjects()
+                        .build()
+                )
             }
 
             override fun onActivityStarted(activity: Activity) {
@@ -313,18 +329,18 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
         val enableTapRecognizer: Boolean? = call.argument("enableTapRecognizer")
         if (enableTapRecognizer != null && enableTapRecognizer) {
             arSceneView
-                    ?.scene
-                    ?.setOnTouchListener { hitTestResult: HitTestResult, event: MotionEvent? ->
+                ?.scene
+                ?.setOnTouchListener { hitTestResult: HitTestResult, event: MotionEvent? ->
 
-                        if (hitTestResult.node != null) {
-                            debugLog(" onNodeTap " + hitTestResult.node?.name)
-                            debugLog(hitTestResult.node?.localPosition.toString())
-                            debugLog(hitTestResult.node?.worldPosition.toString())
-                            methodChannel.invokeMethod("onNodeTap", hitTestResult.node?.name)
-                            return@setOnTouchListener true
-                        }
-                        return@setOnTouchListener gestureDetector.onTouchEvent(event)
+                    if (hitTestResult.node != null) {
+                        debugLog(" onNodeTap " + hitTestResult.node?.name)
+                        debugLog(hitTestResult.node?.localPosition.toString())
+                        debugLog(hitTestResult.node?.worldPosition.toString())
+                        methodChannel.invokeMethod("onNodeTap", hitTestResult.node?.name)
+                        return@setOnTouchListener true
                     }
+                    return@setOnTouchListener gestureDetector.onTouchEvent(event)
+                }
         }
         val enableUpdateListener: Boolean? = call.argument("enableUpdateListener")
         if (enableUpdateListener != null && enableUpdateListener) {
@@ -338,7 +354,7 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
             debugLog(" The plane renderer (enablePlaneRenderer) is set to " + enablePlaneRenderer.toString())
             arSceneView!!.planeRenderer.isVisible = false
         }
-        
+
         result.success(null)
     }
 
@@ -457,7 +473,7 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
 
     fun onResume() {
         debugLog("onResume()")
-
+        restoreEglContext()
         if (arSceneView == null) {
             return
         }
@@ -489,7 +505,7 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
             } catch (ex: UnavailableUserDeclinedInstallationException) {
                 // Display an appropriate message to the user zand return gracefully.
                 Toast.makeText(activity, "TODO: handle exception " + ex.localizedMessage, Toast.LENGTH_LONG)
-                        .show();
+                    .show();
                 return
             } catch (e: UnavailableException) {
                 ArCoreUtils.handleSessionException(activity, e)
@@ -512,13 +528,14 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
     }
 
     fun onPause() {
+        saveEglContext()
         if (arSceneView != null) {
             arSceneView?.pause()
         }
     }
 
     fun onDestroy() {
-      if (arSceneView != null) {
+        if (arSceneView != null) {
             debugLog("Goodbye ARCore! Destroying the Activity now 7.")
 
             try {
@@ -526,12 +543,13 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
                 arSceneView?.scene?.removeOnUpdateListener(faceSceneUpdateListener)
                 debugLog("Goodbye arSceneView.")
 
+                arSceneView?.renderer?.dispose()
                 arSceneView?.destroy()
                 arSceneView = null
 
             }catch (e : Exception){
                 e.printStackTrace();
-           }
+            }
         }
     }
 
@@ -568,4 +586,46 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
         node?.localPosition = parseVector3(call.arguments as HashMap<String, Any>)
         result.success(null)
     }*/
+    private fun restoreEglContext() {
+        if (Looper.getMainLooper().thread != Thread.currentThread()) {
+            throw IllegalStateException("restoreEglContext called from non-UI thread")
+        }
+        debugLog("Restoring EGL context")
+        if (savedContext != null && savedContext != EGL14.EGL_NO_CONTEXT) {
+            if (!EGL14.eglMakeCurrent(savedDisplay, savedDrawSurface, savedReadSurface, savedContext)) {
+                debugLog("Failed to restore")
+            }
+        } else {
+            debugLog("Nothing to restore")
+        }
+    }
+
+    private fun saveEglContext() {
+        if (Looper.getMainLooper().thread != Thread.currentThread()) {
+            throw IllegalStateException("saveEglContext called from non-UI thread")
+        }
+        debugLog("Saving EGL context")
+        val currentContext = EGL14.eglGetCurrentContext()
+        if (currentContext == null || currentContext == EGL14.EGL_NO_CONTEXT) {
+            debugLog("Nothing to save")
+        } else {
+            savedContext = currentContext
+            savedDisplay = EGL14.eglGetCurrentDisplay()
+            savedDrawSurface = EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW)
+            savedReadSurface = EGL14.eglGetCurrentSurface(EGL14.EGL_READ)
+            EGL14.eglMakeCurrent(
+                savedDisplay,
+                EGL14.EGL_NO_SURFACE,
+                EGL14.EGL_NO_SURFACE,
+                EGL14.EGL_NO_CONTEXT
+            )
+        }
+    }
+
+    companion object {
+        private var savedContext: EGLContext? = null
+        private var savedDisplay: EGLDisplay? = null
+        private var savedReadSurface: EGLSurface? = null
+        private var savedDrawSurface: EGLSurface? = null
+    }
 }
