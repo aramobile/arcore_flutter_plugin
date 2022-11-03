@@ -8,12 +8,10 @@ import java.util.Date
 import android.content.pm.PackageManager
 import android.view.PixelCopy
 import android.os.Handler
-import android.os.Build
 import android.Manifest
 import android.graphics.Bitmap
 import android.app.Activity
 import android.util.Log
-import androidx.annotation.MainThread
 import io.flutter.plugin.common.MethodChannel
 import com.google.ar.sceneform.ArSceneView
 
@@ -21,15 +19,15 @@ class ScreenshotsUtils {
 
     companion object {
 
-        fun getPictureName(): String {
+        private fun getPictureName(): String {
 
-            var sDate: String = SimpleDateFormat("yyyyMMddHHmmss").format(Date())
+            val sDate: String = SimpleDateFormat("yyyyMMddHHmmss").format(Date())
 
-            return "arcore-" + sDate + ".png"
+            return "arcore-$sDate.png"
         }
 
 
-        fun saveBitmap(bitmap: Bitmap,activity: Activity): String {
+        private fun saveBitmap(bitmap: Bitmap, activity: Activity): String {
 
             val cacheDir = activity.cacheDir
 
@@ -59,7 +57,7 @@ class ScreenshotsUtils {
 
         }
 
-        fun permissionToWrite(activity: Activity): Boolean {
+        private fun permissionToWrite(activity: Activity): Boolean {
 
             val perm = activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
@@ -101,32 +99,31 @@ class ScreenshotsUtils {
            
             try {
 
-                val view = arSceneView
-
                 val bitmapImage: Bitmap = Bitmap.createBitmap(
-                                view.width,
-                                view.height,
-                                Bitmap.Config.ARGB_8888
-                        )
+                    arSceneView.width,
+                    arSceneView.height,
+                    Bitmap.Config.ARGB_8888
+                )
                 Log.i("Sreenshot", "PixelCopy requesting now...")
-                PixelCopy.request(view, bitmapImage, { copyResult -> 
-                      if (copyResult == PixelCopy.SUCCESS) {
-                        Log.i("Sreenshot", "PixelCopy request SUCESS. $copyResult")
-                        
-                        val pathSaved: String = saveBitmap(bitmapImage,activity)
+                PixelCopy.request(
+                    arSceneView, bitmapImage, { copyResult ->
+                        if (copyResult == PixelCopy.SUCCESS) {
+                            Log.i("Sreenshot", "PixelCopy request SUCESS. $copyResult")
 
-                        Log.i("Sreenshot", "Saved on path: $pathSaved")
-                        result.success(pathSaved)
+                            val pathSaved: String = saveBitmap(bitmapImage, activity)
 
-                      }else{
-                          Log.i("Sreenshot", "PixelCopy request failed. $copyResult")
-                          result.success(null)
-                      }
+                            Log.i("Sreenshot", "Saved on path: $pathSaved")
+                            result.success(pathSaved)
 
-                    }, 
-                    Handler())
+                        } else {
+                            Log.i("Sreenshot", "PixelCopy request failed. $copyResult")
+                            result.success(null)
+                        }
 
-                bitmapImage.recycle()
+                    },
+                    Handler()
+                )
+
             } catch (e: Exception){
 
                 e.printStackTrace()

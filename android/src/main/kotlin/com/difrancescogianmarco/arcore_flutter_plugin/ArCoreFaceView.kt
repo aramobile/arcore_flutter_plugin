@@ -142,7 +142,7 @@ class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessen
         if (enableAugmentedFaces != null && enableAugmentedFaces) {
             // This is important to make sure that the camera stream renders first so that
             // the face mesh occlusion works correctly.
-            arSceneView?.cameraStreamRenderPriority = Renderable.RENDER_PRIORITY_FIRST
+           // arSceneView?.cameraStreamRenderPriority = Renderable.RENDER_PRIORITY_FIRST
             arSceneView?.scene?.addOnUpdateListener(faceSceneUpdateListener)
         }
 
