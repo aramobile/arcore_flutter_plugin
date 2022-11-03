@@ -259,7 +259,7 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
 
     private fun setupLifeCycle(context: Context) {
         activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
-            override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 debugLog("onActivityCreated")
 //                maybeEnableArButton()
                 StrictMode.setVmPolicy(
@@ -268,6 +268,7 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
                         .build()
                 )
             }
+
 
             override fun onActivityStarted(activity: Activity) {
                 debugLog("onActivityStarted")
@@ -330,7 +331,7 @@ class ArCoreView(val activity: Activity, context: Context, messenger: BinaryMess
         if (enableTapRecognizer != null && enableTapRecognizer) {
             arSceneView
                 ?.scene
-                ?.setOnTouchListener { hitTestResult: HitTestResult, event: MotionEvent? ->
+                ?.setOnTouchListener { hitTestResult: HitTestResult, event: MotionEvent ->
 
                     if (hitTestResult.node != null) {
                         debugLog(" onNodeTap " + hitTestResult.node?.name)
