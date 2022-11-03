@@ -1,21 +1,19 @@
 package com.difrancescogianmarco.arcore_flutter_plugin.utils
 
-import java.nio.ByteBuffer
 import java.io.File
 import java.io.OutputStream
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
-import android.content.pm.PackageManager;
+import android.content.pm.PackageManager
 import android.view.PixelCopy
-import android.graphics.Canvas
 import android.os.Handler
-import android.os.Environment
 import android.os.Build
-import android.Manifest;
+import android.Manifest
 import android.graphics.Bitmap
 import android.app.Activity
 import android.util.Log
+import androidx.annotation.MainThread
 import io.flutter.plugin.common.MethodChannel
 import com.google.ar.sceneform.ArSceneView
 
@@ -25,23 +23,19 @@ class ScreenshotsUtils {
 
         fun getPictureName(): String {
 
-            var sDate: String = SimpleDateFormat("yyyyMMddHHmmss").format(Date());
+            var sDate: String = SimpleDateFormat("yyyyMMddHHmmss").format(Date())
 
-            return "arcore-" + sDate + ".png";
+            return "arcore-" + sDate + ".png"
         }
 
 
         fun saveBitmap(bitmap: Bitmap,activity: Activity): String {
 
-            val cacheDir = activity.getCacheDir();
+            val cacheDir = activity.cacheDir
 
-            val dir = File(cacheDir, getPictureName());
-
-            val dirPath: String;
+            val file = File(cacheDir, getPictureName())
 
             try{
-
-                val file = dir;
 
                 // Get the file output stream
                 val stream: OutputStream = FileOutputStream(file)
@@ -60,85 +54,79 @@ class ScreenshotsUtils {
                 e.printStackTrace()
             }
 
-
-            return dir.getAbsolutePath();
+            return file.absolutePath
 
 
         }
 
         fun permissionToWrite(activity: Activity): Boolean {
-            
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                Log.i("Sreenshot", "Permission to write false due to version codes.");
 
-                return false;
-            }
-
-            var perm = activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            val perm = activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
             if(perm == PackageManager.PERMISSION_GRANTED) {
-                Log.i("Sreenshot", "Permission to write granted!");
+                Log.i("Sreenshot", "Permission to write granted!")
 
-                return true;
+                return true
             }
 
-            Log.i("Sreenshot","Requesting permissions...");
+            Log.i("Sreenshot","Requesting permissions...")
             activity.requestPermissions(
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 11
-            );
-            Log.i("Sreenshot", "No permissions :(");
+            )
+            Log.i("Sreenshot", "No permissions :(")
 
-            return false;
+            return false
         } 
 
 
         fun onGetSnapshot(arSceneView: ArSceneView?, result: MethodChannel.Result,activity: Activity){
 
             if( !permissionToWrite(activity) ) {
-                Log.i("Sreenshot", "Permission to write files missing!");
+                Log.i("Sreenshot", "Permission to write files missing!")
 
-                result.success(null);
+                result.success(null)
 
-                return;
+                return
             }
 
             if(arSceneView == null){
-                Log.i("Sreenshot", "Ar Scene View is NULL!");
+                Log.i("Sreenshot", "Ar Scene View is NULL!")
 
-                result.success(null);
+                result.success(null)
 
-                return;
+                return
             }
      
            
             try {
 
-                val view = arSceneView!!;
+                val view = arSceneView
 
                 val bitmapImage: Bitmap = Bitmap.createBitmap(
-                                view.getWidth(),
-                                view.getHeight(),
+                                view.width,
+                                view.height,
                                 Bitmap.Config.ARGB_8888
-                        );
-                Log.i("Sreenshot", "PixelCopy requesting now...");
+                        )
+                Log.i("Sreenshot", "PixelCopy requesting now...")
                 PixelCopy.request(view, bitmapImage, { copyResult -> 
                       if (copyResult == PixelCopy.SUCCESS) {
-                        Log.i("Sreenshot", "PixelCopy request SUCESS. ${copyResult}");
+                        Log.i("Sreenshot", "PixelCopy request SUCESS. $copyResult")
                         
-                        var pathSaved: String = saveBitmap(bitmapImage,activity);
+                        val pathSaved: String = saveBitmap(bitmapImage,activity)
 
-                        Log.i("Sreenshot", "Saved on path: ${pathSaved}");
-                        result.success(pathSaved);
+                        Log.i("Sreenshot", "Saved on path: $pathSaved")
+                        result.success(pathSaved)
 
                       }else{
-                          Log.i("Sreenshot", "PixelCopy request failed. ${copyResult}");
-                          result.success(null);
+                          Log.i("Sreenshot", "PixelCopy request failed. $copyResult")
+                          result.success(null)
                       }
 
                     }, 
-                    Handler());
-                
+                    Handler())
+
+                bitmapImage.recycle()
             } catch (e: Exception){
 
                 e.printStackTrace()
