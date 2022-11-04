@@ -1,7 +1,6 @@
 package com.difrancescogianmarco.arcore_flutter_plugin
 
 import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -9,18 +8,13 @@ import android.opengl.EGL14
 import android.opengl.EGLContext
 import android.opengl.EGLDisplay
 import android.opengl.EGLSurface
-import android.os.Bundle
-import android.os.Handler
 import android.os.Looper
-import android.os.StrictMode.VmPolicy
-import android.util.Log
 import com.difrancescogianmarco.arcore_flutter_plugin.utils.ArCoreUtils
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.Config
 import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.UnavailableException
-import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Scene
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
@@ -31,7 +25,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlin.collections.HashMap
 import com.difrancescogianmarco.arcore_flutter_plugin.utils.ScreenshotsUtils
-import android.os.StrictMode
 
 class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessenger, id: Int, debug: Boolean) : BaseArCoreView(activity, context, messenger, id, debug) {
 
@@ -89,7 +82,7 @@ class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessen
             debugLog(call.method +"called on supported device")
             when (call.method) {
                 "init" -> {
-                    arScenViewInit(call, result)
+                    arSceneViewInit(call, result)
                 }
                 "takeScreenshot" -> {
                     debugLog(" Take screenshot...")
@@ -137,12 +130,12 @@ class ArCoreFaceView(activity:Activity,context: Context, messenger: BinaryMessen
             .thenAccept { texture -> faceMeshTexture = texture }
     }
 
-    private fun arScenViewInit(call: MethodCall, result: MethodChannel.Result) {
+    private fun arSceneViewInit(call: MethodCall, result: MethodChannel.Result) {
         val enableAugmentedFaces: Boolean? = call.argument("enableAugmentedFaces")
         if (enableAugmentedFaces != null && enableAugmentedFaces) {
             // This is important to make sure that the camera stream renders first so that
             // the face mesh occlusion works correctly.
-           // arSceneView?.cameraStreamRenderPriority = Renderable.RENDER_PRIORITY_FIRST
+            arSceneView?.cameraStreamRenderPriority = Renderable.RENDER_PRIORITY_FIRST
             arSceneView?.scene?.addOnUpdateListener(faceSceneUpdateListener)
         }
 

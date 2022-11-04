@@ -54,14 +54,14 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.ar:core:1.34.0'
-    api project(":sceneformux")
+//    api project(":sceneformux")
 //    implementation 'io.github.sceneview:arsceneview:0.9.0'
-    /*implementation 'com.google.ar.sceneform:core:1.17.1'
+    implementation 'com.google.ar.sceneform:core:1.17.1'
     implementation 'com.google.ar.sceneform:assets:1.17.1'
-    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.17.1'*/
+    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.17.1'
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 }
 
 afterEvaluate {
