@@ -4,24 +4,18 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
-import android.util.Log
 import android.view.View
 import com.difrancescogianmarco.arcore_flutter_plugin.flutter_models.FlutterArCoreNode
 import com.difrancescogianmarco.arcore_flutter_plugin.utils.ArCoreUtils
-import com.google.ar.core.ArCoreApk
-import com.google.ar.core.Pose
-import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Node
-import io.flutter.app.FlutterApplication
+import com.google.ar.sceneform.rendering.Renderer
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
-import com.google.ar.sceneform.rendering.Renderer
 
 open class BaseArCoreView(val activity: Activity, context: Context, messenger: BinaryMessenger, id: Int, protected val debug: Boolean) : PlatformView, MethodChannel.MethodCallHandler {
 
@@ -46,7 +40,7 @@ open class BaseArCoreView(val activity: Activity, context: Context, messenger: B
 
     protected fun debugLog(message: String) {
         if (debug) {
-            debugLog(message)
+            println(message)
         }
     }
 
