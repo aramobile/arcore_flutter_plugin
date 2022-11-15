@@ -30,7 +30,7 @@ public final class ARFaceFlutterView: NSObject, FlutterPlatformView {
         faceViewController = FacesViewController()
         super.init()
         if(messenger != nil) {
-            let channel = FlutterMethodChannel(name: "arcore_flutter_plugin",
+            let channel = FlutterMethodChannel(name: "arcore_flutter_plugin_\(viewId)",
                                                binaryMessenger: messenger!)
             channel.setMethodCallHandler({ (call: FlutterMethodCall, result: FlutterResult) -> Void in
                 switch call.method {
