@@ -175,6 +175,7 @@ class _SphereControlState extends State<SphereControl> {
         children: <Widget>[
           Row(
             children: <Widget>[
+              /*
               RaisedButton(
                 child: Text("Random Color"),
                 onPressed: () {
@@ -184,7 +185,7 @@ class _SphereControlState extends State<SphereControl> {
                     color = newColor;
                   });
                 },
-              ),
+              ),*/
               Padding(
                 padding: const EdgeInsets.only(left: 20.0),
                 child: CircleAvatar(

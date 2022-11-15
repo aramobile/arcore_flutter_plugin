@@ -32,13 +32,14 @@ class ArCoreController {
     return arcoreInstalled;
   }
 
-  ArCoreController({int? id,
-    this.enableTapRecognizer = false,
-    this.enablePlaneRenderer = false,
-    this.enableUpdateListener = false,
-    this.debug = false
+  ArCoreController(
+      {int? id,
+      this.enableTapRecognizer = false,
+      this.enablePlaneRenderer = false,
+      this.enableUpdateListener = false,
+      this.debug = false
 //    required this.onUnsupported,
-  }) {
+      }) {
     _channel = MethodChannel('arcore_flutter_plugin_$id');
     _channel.setMethodCallHandler(_handleMethodCalls);
     init();
@@ -139,7 +140,6 @@ class ArCoreController {
     return _channel.invokeMethod('addArCoreNode', params);
   }
 
-
   Future<String> togglePlaneRenderer() async {
     String result = await _channel.invokeMethod('togglePlaneRenderer');
     return result;
@@ -195,8 +195,10 @@ class ArCoreController {
   }
 
   void _handlePositionChanged(ArCoreNode node) {
-    _channel.invokeMethod<void>('positionChanged',
-        _getHandlerParams(node, convertVector3ToMap(node.position.value)??{}));
+    _channel.invokeMethod<void>(
+        'positionChanged',
+        _getHandlerParams(
+            node, convertVector3ToMap(node.position.value) ?? {}));
   }
 
   void _handleRotationChanged(ArCoreRotatingNode node) {
@@ -206,7 +208,7 @@ class ArCoreController {
 
   void _updateMaterials(ArCoreNode node) {
     _channel.invokeMethod<void>(
-        'updateMaterials', _getHandlerParams(node, node?.shape?.toMap()??{}));
+        'updateMaterials', _getHandlerParams(node, node?.shape?.toMap() ?? {}));
   }
 
   Map<String, dynamic> _getHandlerParams(
@@ -257,10 +259,8 @@ class ArCoreController {
   }
 
   Future<String> snapshot() async {
-
     final String path = await _channel.invokeMethod('takeScreenshot');
-    
+
     return path;
   }
-  
 }

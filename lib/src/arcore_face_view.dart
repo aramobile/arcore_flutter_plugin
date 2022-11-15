@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'arcore_face_controller.dart';
 import 'arcore_view.dart';
 
+import 'package:arcore_flutter_plugin/src/arcore_ios_view.dart';
+
 typedef void ArCoreFaceViewCreatedCallback(ArCoreFaceController controller);
 
 class ArCoreFaceView extends StatefulWidget {
@@ -41,6 +43,12 @@ class _ArCoreFaceViewState extends State<ArCoreFaceView>
           arCoreViewType: ArCoreViewType.AUGMENTEDFACE,
           debug: widget.debug,
         ),
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return Container(
+        child: ArCoreiOSView(
+            viewType: 'arcore_flutter_plugin',
+            onPlatformViewCreated: _onPlatformViewCreated),
       );
     }
     return Center(

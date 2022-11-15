@@ -3,6 +3,8 @@ import 'package:arcore_flutter_plugin/src/arcore_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:arcore_flutter_plugin/src/arcore_ios_view.dart';
+
 typedef void ArCoreViewCreatedCallback(ArCoreController controller);
 
 enum ArCoreViewType { AUGMENTEDFACE, STANDARDVIEW, AUGMENTEDIMAGES }
@@ -51,7 +53,15 @@ class _ArCoreViewState extends State<ArCoreView> with WidgetsBindingObserver {
           debug: widget.debug,
         ),
       );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return Container(
+        child: ArCoreiOSView(
+          viewType: 'arcore_flutter_plugin',
+          onPlatformViewCreated: _onPlatformViewCreated,
+        ),
+      );
     }
+
     return Center(
       child:
           Text('$defaultTargetPlatform is not supported by the ar_view plugin'),

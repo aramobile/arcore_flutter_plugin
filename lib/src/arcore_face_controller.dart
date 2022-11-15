@@ -4,8 +4,8 @@ import '../arcore_flutter_plugin.dart';
 
 class ArCoreFaceController {
   ArCoreFaceController(
-      {int? id, this.enableAugmentedFaces=false, this.debug = false}) {
-    _channel = MethodChannel('arcore_flutter_plugin_$id');
+      {int? id, this.enableAugmentedFaces = false, this.debug = false}) {
+    _channel = MethodChannel('arcore_flutter_plugin');
     _channel.setMethodCallHandler(_handleMethodCalls);
     init();
   }
@@ -54,7 +54,6 @@ class ArCoreFaceController {
   }
 
   Future<String> snapshot() async {
-
     final String path = await _channel.invokeMethod('takeScreenshot');
 
     return path;
