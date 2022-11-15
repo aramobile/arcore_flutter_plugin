@@ -49,15 +49,6 @@ public final class ARFaceView: UIView {
   //private var foreheadRightNode: SCNNode?
     
     private var hasTexture = false
-    /*
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        initialize()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }*/
     
     public func initialize() {
         if !setupScene() {
@@ -77,27 +68,7 @@ public final class ARFaceView: UIView {
           alertMessage = "Failed to create session. Error description: \(error)"
           popupAlertWindowOnError(alertWindowTitle: alertWindowTitle, alertMessage: alertMessage)
         }
-
-
-        /*
-        let label = UILabel()
-        label.frame = CGRect(x: 10, y: 10, width: 200, height: 200)
-        label.text = "FaceMask for iOS. Please check the application."
-        label.textColor = UIColor.white
-        label.backgroundColor = UIColor.red
-        self.addSubview(label)*/
     }
-    /*
-
-  override public func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-
-    viewDidAppearReached = true
-
-    if needToShowFatalError {
-      popupAlertWindowOnError(alertWindowTitle: alertWindowTitle, alertMessage: alertMessage)
-    }
-  }*/
 
   /// Create the scene view from a scene and supporting nodes, and add to the view.
   /// The scene is loaded from 'fox_face.scn' which was created from 'canonical_face_mesh.fbx', the
@@ -146,35 +117,14 @@ public final class ARFaceView: UIView {
 
     return true
   }
-    
-    public func setTexture(path : String) -> Void {
-        if(hasTexture == false) {
-            faceNode.addChildNode(faceTextureNode)
-            faceNode.addChildNode(faceOccluderNode)
-            hasTexture = true
-        }
-        let faceImage = UIImage(named: path)
-        faceTextureMaterial.diffuse.contents = faceImage
-    }
-
-    public func loadMesh() -> Void {
-        if(hasTexture == false) {
-            faceNode.addChildNode(faceTextureNode)
-            faceNode.addChildNode(faceOccluderNode)
-            hasTexture = true
-        }
-        let faceImage = UIImage(named: "Face.scnassets/canonical_fr_last version.png")
-        faceTextureMaterial.diffuse.contents = faceImage
-    }
 
     public func loadMesh(data : Data) -> Void {
-        if(hasTexture == false) {
-            faceNode.addChildNode(faceTextureNode)
-            faceNode.addChildNode(faceOccluderNode)
-            hasTexture = true
-        }
-        //let faceImage = UIImage(named: path)
-        faceTextureMaterial.diffuse.contents = data
+      if(hasTexture == false) {
+        faceNode.addChildNode(faceTextureNode)
+        faceNode.addChildNode(faceOccluderNode)
+        hasTexture = true
+      }
+      faceTextureMaterial.diffuse.contents = data
     }
 
   /// Setup a camera capture session from the front camera to receive captures.
@@ -307,11 +257,18 @@ public final class ARFaceView: UIView {
   }
 
     public func snapshot () -> String? {
-        let snapshotImage = sceneView.snapshot()
+        let snapshotImage = UIGraphicsImageRenderer(size: bounds.size).image { _ in
+            drawHierarchy(in: CGRect(origin: .zero, size: bounds.size), afterScreenUpdates: true)
+        }
+        //let snapshotImage = sceneView.snapshot()
         if let bytes = snapshotImage.pngData() {
             let filename = getDocumentsDirectory().appendingPathComponent("copy.png")
             try? bytes.write(to: filename)
-            return filename.absoluteString
+            var filenamePath = filename.absoluteString
+            if let range = filenamePath.range(of:"file://") {
+                 filenamePath = filenamePath.replacingCharacters(in: range, with:"")
+            }
+            return filenamePath
         } else {
             return nil
         }

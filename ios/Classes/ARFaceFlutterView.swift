@@ -23,14 +23,10 @@ public final class ARFaceFlutterView: NSObject, FlutterPlatformView {
     
     init(frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, binaryMessenger messenger: FlutterBinaryMessenger?)
     {
-        //self._view = ARFaceView(frame: frame)
-        //self._view.initialize()
-        //self._view.loadMesh()
-        //_view.backgroundColor = UIColor.green
         faceViewController = FacesViewController()
         super.init()
         if(messenger != nil) {
-            let channel = FlutterMethodChannel(name: "arcore_flutter_plugin_\(viewId)",
+            let channel = FlutterMethodChannel(name: "arcore_flutter_plugin\(viewId)",
                                                binaryMessenger: messenger!)
             channel.setMethodCallHandler({ (call: FlutterMethodCall, result: FlutterResult) -> Void in
                 switch call.method {
@@ -42,30 +38,16 @@ public final class ARFaceFlutterView: NSObject, FlutterPlatformView {
                         print(textureData)
                         self.faceViewController.loadMesh(data: textureData)
                     }
-                    //self._view.loadMesh()
-                    result("true")
+                    result(true)
                 case "init":
-                    let rootViewController = UIApplication.shared.windows.filter({ (w) -> Bool in
-                          return w.isHidden == false
-                    }).first?.rootViewController
-                    //let faceViewController = FacesViewController()
-                    //rootViewController?.present(self.faceViewController, animated: true, completion: nil)
-                    return result("true")
+                    return result(true)
                 case "takeScreenshot":
                     let snapshotImagePath = self.faceViewController.snapshot()
                     result(snapshotImagePath)
-                case "checkArCoreApkAvailability":
-                    result("true")
-                case "checkIfARCoreServicesInstalled":
-                    result("true")
                 default:
-                    result("true")
+                    result(true)
                 }
             })
         }
-    }
-    
-    public func setTexture(path : String) -> Void {
-        //_view.setTexture(path: path)
     }
 }

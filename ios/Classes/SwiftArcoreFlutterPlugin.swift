@@ -9,8 +9,6 @@ public class SwiftArcoreFlutterPlugin: NSObject, FlutterPlugin {
     registrar.register(factory, withId: "arcore_flutter_plugin")
     
     let channelUtils = FlutterMethodChannel(name: "arcore_flutter_plugin/utils", binaryMessenger: registrar.messenger())
-    //let instance = SwiftArcoreFlutterPlugin()
-    //registrar.addMethodCallDelegate(instance, channel: channelUtils)
     channelUtils.setMethodCallHandler({ (call: FlutterMethodCall, result: FlutterResult) -> Void in          
         switch call.method {
             case "checkArCoreApkAvailability":
@@ -22,18 +20,4 @@ public class SwiftArcoreFlutterPlugin: NSObject, FlutterPlugin {
         }
     })
   }
-/*
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    //return result(true)
-    switch call.method {
-        case "checkArCoreApkAvailability":
-            result("true")
-        case "checkIfARCoreServicesInstalled":
-            result("true")
-        default:
-            result(FlutterMethodNotImplemented)
-    }
-    result("iOS " + UIDevice.current.systemVersion)
-  }
-  */
 }
