@@ -262,7 +262,8 @@ public final class ARFaceView: UIView {
         }
         //let snapshotImage = sceneView.snapshot()
         if let bytes = snapshotImage.pngData() {
-            let filename = getDocumentsDirectory().appendingPathComponent("copy.png")
+            let randomString = NSUUID().uuidString
+            let filename = getDocumentsDirectory().appendingPathComponent("\(randomString).png")
             try? bytes.write(to: filename)
             var filenamePath = filename.absoluteString
             if let range = filenamePath.range(of:"file://") {
