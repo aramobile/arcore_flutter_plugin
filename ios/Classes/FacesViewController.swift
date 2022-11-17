@@ -59,4 +59,9 @@ public final class FacesViewController: UIViewController {
     public func snapshot() -> String? {
         return arFaceView.snapshot()
     }
+
+    public func dispose() {
+        arFaceView.dispose()
+        arFaceView.removeFromSuperview()
+    }
 }

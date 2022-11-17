@@ -279,6 +279,14 @@ public final class ARFaceView: UIView {
         return paths[0]
     }
 
+
+    public func dispose() {
+        captureSession?.stopRunning()
+        motionManager.stopDeviceMotionUpdates()
+        sceneView.removeFromSuperview()
+        cameraImageLayer.removeFromSuperlayer()
+    }
+
 }
 
 // MARK: - Camera delegate

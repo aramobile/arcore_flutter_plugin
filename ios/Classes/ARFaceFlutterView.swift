@@ -44,6 +44,9 @@ public final class ARFaceFlutterView: NSObject, FlutterPlatformView {
                 case "takeScreenshot":
                     let snapshotImagePath = self.faceViewController.snapshot()
                     result(snapshotImagePath)
+                case "dispose":
+                    self.faceViewController.dispose()
+                    result(true)
                 default:
                     result(true)
                 }
